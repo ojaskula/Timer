@@ -3,7 +3,7 @@ Simple arduino bare-metal project
 
 # Overwiew
 
-Simple project osing Arduino UNO with I2C module. The program is written using olny AVR libraries. It works as follows:
+Simple project osing Arduino UNO with I2C module. The program is written using olny AVR libraries. It works as follows: \n
 After turning on the device, the user will see an LCD that displays “00:00:00”
 (hours:minutes:seconds). On the last digit, there will be a blinking cursor.
 The user has five buttons to control the device. First two move the cursor left and right
