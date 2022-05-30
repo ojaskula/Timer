@@ -3,32 +3,17 @@
 #include <avr/interrupt.h>
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
-short mode = 0;              //0=setup; 1=counting; 2=alarm
-int h = 0;                   //hours
-int m = 0;                   //minutes
-int s = 0;                   //seconds
-char _time[5];               //array with time
-long debounceDelay = 20;     //debounce time
-short cursorPos = 11;        //cursor position
-long previousTime = 0;       //used to measure 1 second
-long blinkDelay = 50;        //used to blink a LED
-bool LED = 0;                //current LED state
-int s_cpy = 0;               //copy of current time
-long timer2 = 0;             //timer2 interrupts counter 
-
-void pressedMode0() {        //lcd handling after pressing button in mode 0
-  pressedMode1();
-  lcd.setCursor(cursorPos, 0);
-  TCNT2  = 0;
-  timer2 = 0;
-}
-
-void pressedMode1() {        //lcd handling after pressing button in mode 1
-  lcd.clear();
-  lcd.setCursor(4, 0);
-  sprintf(_time, "%02d:%02d:%02d", h, m, s);
-  lcd.print(_time);
-}
+short int mode = 0;           //0=setup; 1=counting; 2=alarm
+int h = 0;                    //hours
+int m = 0;                    //minutes
+int s = 0;                    //seconds
+char _time[5];                //array with time
+short int debounceDelay = 20; //debounce time
+short int cursorPos = 11;     //cursor position
+short int blinkDelay = 50;    //used to blink a LED
+bool LED = 0;                 //current LED state
+int s_cpy = 0;                //copy of current time
+long int timer2 = 0;          //timer2 interrupts counter
 
 void setup() {
   DDRB |= 0b00000000;               //i/o initialization
@@ -60,29 +45,26 @@ void setup() {
 
 ISR(TIMER1_COMPA_vect) {
   if (mode == 1) s -= 1;
-  //OCR1A = 0xF424;
 }
 
 ISR(TIMER2_COMPA_vect) {
   timer2 += 1;
-  //OCR2A = 0x9C;
 }
 
 void loop() {
-
   if (mode == 0) {                                      //setup mode
     if (timer2 > debounceDelay) {                       //button debounce handling
-      if ((PINB & 0b00001) == 0) {                      //botton 1 pressed
+      if ((PINB & 0b00001) == 0) {                      //button 1 pressed
         if (cursorPos == 5) cursorPos = 11;             //move cursor left
         else cursorPos -= 3;
         pressedMode0();
       }
-      if ((PINB & 0b00010) == 0) {                      //botton 2 pressed
+      if ((PINB & 0b00010) == 0) {                      //button 2 pressed
         if (cursorPos == 11) cursorPos = 5;             //move cursor right
         else cursorPos += 3;
         pressedMode0();
       }
-      if ((PINB & 0b00100) == 0) {                      //botton 3 pressed
+      if ((PINB & 0b00100) == 0) {                      //button 3 pressed
         if (cursorPos == 5) {                           //decrease value under cursor
           if (h == 0) h = 23;
           else h -= 1;
@@ -97,7 +79,7 @@ void loop() {
         }
         pressedMode0();
       }
-      if ((PINB & 0b01000) == 0) {                      //botton 4 pressed
+      if ((PINB & 0b01000) == 0) {                      //button 4 pressed
         if (cursorPos == 5) {                           //increase value under cursor
           if (h == 23) h = 0;
           else h += 1;
@@ -112,8 +94,8 @@ void loop() {
         }
         pressedMode0();
       }
-      if ((PINB & 0b10000) == 0) {                      //botton 5 pressed, start counting down
-        if (h > 0 | m > 0 | s > 0) {                                 
+      if ((PINB & 0b10000) == 0) {                      //button 5 pressed, start counting
+        if (h > 0 | m > 0 | s > 0) {
           mode = 1;
           pressedMode0();
           lcd.noBlink();
@@ -173,4 +155,18 @@ void loop() {
       timer2 = 0;
     }
   }
+}
+
+void pressedMode0() {        //lcd and timer handling after pressing button in mode 0
+  pressedMode1();
+  lcd.setCursor(cursorPos, 0);
+  TCNT2  = 0;
+  timer2 = 0;
+}
+
+void pressedMode1() {        //lcd handling after pressing button in mode 1
+  lcd.clear();
+  lcd.setCursor(4, 0);
+  sprintf(_time, "%02d:%02d:%02d", h, m, s);
+  lcd.print(_time);
 }
